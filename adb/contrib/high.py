@@ -444,12 +444,12 @@ class HighDevice(object):
   def Root(self):
     return self._device.Root()
 
-  def Shell(self, cmd):
+  def Shell(self, cmd, timeout_ms=None):
     """Automatically uses WrappedShell() when necessary."""
     if self._device.IsShellOk(cmd):
-      return self._device.Shell(cmd)
+      return self._device.Shell(cmd, timeout_ms=timeout_ms)
     else:
-      return self.WrappedShell([cmd])
+      return self.WrappedShell([cmd], timeout_ms=timeout_ms)
 
   def ShellRaw(self, cmd):
     return self._device.ShellRaw(cmd)
@@ -729,7 +729,9 @@ class HighDevice(object):
 
   def GetPackages(self):
     """Returns the list of packages installed."""
-    out, _ = self.Shell('pm list packages')
+    # pm can be very slow at times. Use a longer timeout to prevent
+    # confusing a long-running command with an interrupted connection.
+    out, _ = self.Shell('pm list packages', timeout_ms=30000)
     if not out:
       return None
     return [l.split(':', 1)[1] for l in out.strip().splitlines() if ':' in l]
@@ -818,7 +820,9 @@ class HighDevice(object):
             'time',
             self.port_path)
         return False
-      out, _ = self.Shell('pm path')
+      # pm can be very slow at times. Use a longer timeout to prevent
+      # confusing a long-running command with an interrupted connection.
+      out, _ = self.Shell('pm path', timeout_ms=30000)
       if out == 'Error: no package specified\n':
         # It's up!
         break
@@ -880,7 +884,7 @@ class HighDevice(object):
       if self.PushContent(content, name):
         return name
 
-  def WrappedShell(self, commands):
+  def WrappedShell(self, commands, timeout_ms=None):
     """Creates a temporary shell script, runs it then return the data.
 
     This is needed when:
@@ -899,7 +903,8 @@ class HighDevice(object):
       if not outfile:
         return False
       try:
-        _, exit_code = self.Shell('sh %s &> %s' % (script, outfile))
+        _, exit_code = self.Shell('sh %s &> %s' % (script, outfile),
+                                  timeout_ms=timeout_ms)
         out = self.PullContent(outfile)
         return out, exit_code
       finally:
