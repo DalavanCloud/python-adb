@@ -156,14 +156,14 @@ def _InitCache(device):
           int(i) for i in available_frequencies.strip().split())
     else:
       # It's possibly an older kernel. In that case, query the min/max instead.
-      cpuinfo_min_freq = device.PullContent(
-          '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq')
-      cpuinfo_max_freq = device.PullContent(
-          '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq')
-      if cpuinfo_min_freq and cpuinfo_max_freq:
+      scaling_min_freq = device.PullContent(
+          '/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq')
+      scaling_max_freq = device.PullContent(
+          '/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq')
+      if scaling_min_freq and scaling_max_freq:
         # In practice there's more CPU speeds than this but there's no way (?)
         # to query this information.
-        available_frequencies = [int(cpuinfo_min_freq), int(cpuinfo_max_freq)]
+        available_frequencies = [int(scaling_min_freq), int(scaling_max_freq)]
 
     cache = DeviceCache(
         properties, external_storage_path, has_su,
@@ -193,12 +193,12 @@ KNOWN_CPU_SCALING_GOVERNOR_VALUES = (
     # there isn't much load.
     'ondemand',
     # performance locks the CPU frequency at its maximum supported frequency; it
-    # is the equivalent of userspace at cpuinfo_max_freq. On a ARM based device
+    # is the equivalent of userspace at scaling_max_freq. On a ARM based device
     # without active cooling, this means that eventually the CPU will hit
     # temperature based throttling.
     'performance',
     # powersave locks the CPU frequency to its lowest supported frequency; it is
-    # the equivalent of userspace at cpuinfo_min_freq.
+    # the equivalent of userspace at scaling_min_freq.
     'powersave',
     # userspace overrides the scaling governor with an user defined constant
     # frequency.
