@@ -30,7 +30,7 @@ class MockDevice(object):
   def IsShellOk(self, cmd):  # pylint: disable=unused-argument
     return True
 
-  def Shell(self, cmd):
+  def Shell(self, cmd, timeout_ms=None):
     data = self._cmds.pop(0)
     assert data[0] == cmd, (data, cmd)
     return data[1], 0
