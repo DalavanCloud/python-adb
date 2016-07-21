@@ -448,20 +448,22 @@ class AdbCommandsSafe(object):
       return out, None
     # adb shell uses CRLF EOL. Only God Knows Why.
     out = out.replace('\r\n', '\n')
-    # TODO(maruel): Remove and handle if this is ever trapped.
-    assert out[-1] == '\n', out
-    # Strip the last line to extract the exit code.
-    parts = out[:-1].rsplit('\n', 1)
     exit_code = None
-    if len(parts) > 1:
-      try:
-        exit_code = int(parts[1])
-      except (IndexError, ValueError):
-        # The exit code wasn't output.
-        parts[0] += '\n' + parts[1]
+    if out[-1] != '\n':
+      # The command was cut out. Assume return code was 1 but do not discard the
+      # out.
+      exit_code = 1
     else:
-      parts[0] = out
-    return parts[0], exit_code
+      # Strip the last line to extract the exit code.
+      parts = out[:-1].rsplit('\n', 1)
+      if len(parts) > 1:
+        try:
+          exit_code = int(parts[1])
+        except (IndexError, ValueError):
+          exit_code = 1
+        else:
+          out = parts[0]
+    return out, exit_code
 
   def StreamingShell(self, cmd):
     """Streams the output from shell.
