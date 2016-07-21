@@ -189,6 +189,11 @@ class AdbCommandsSafe(object):
     return self._port_path
 
   @property
+  def sysfs_port_path(self):
+    if self._handle and self._handle.is_open:
+      return self._handle.sysfs_port_path
+
+  @property
   def public_keys(self):
     """Returns the list of the public keys."""
     return [r.GetPublicKey() for r in self._rsa_keys]
