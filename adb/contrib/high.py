@@ -864,17 +864,19 @@ class HighDevice(object):
         return False
       # pm can be very slow at times. Use a longer timeout to prevent
       # confusing a long-running command with an interrupted connection.
-      out, _ = self.Shell('pm path', timeout_ms=30000)
+      out, exit_code = self.Shell('pm path', timeout_ms=30000)
       if out == 'Error: no package specified\n':
         # It's up!
         break
 
       # Accepts an empty string too, which has been observed only on Android 4.4
       # (Kitkat) but not on later versions.
-      assert out in (
+      if out not in (
           'Error: Could not access the Package Manager.  Is the system '
           'running?\n',
-          ''), out
+          ''):
+        logging.warning(
+            'Unexpected reply from pm path (%d): %r', exit_code, out)
       time.sleep(0.1)
 
     return True
