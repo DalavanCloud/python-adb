@@ -432,15 +432,18 @@ class HighDevice(object):
   def PushContent(self, *args, **kwargs):
     return self._device.PushContent(*args, **kwargs)
 
-  def Reboot(self):
+  def Reboot(self, wait=True):
     """Reboots the phone then Waits for the device to come back.
 
     adbd running on the phone will likely not be in Root(), so the caller should
     call Root() right afterward if desired.
     """
-    if not self._device.Reboot():
+    if not self._device.Reboot(wait=wait):
       return False
-    return self.WaitUntilFullyBooted()
+    return self.WaitUntilFullyBooted() if wait else True
+
+  def Reset(self, new_endpoint=None):
+    self._device.ResetHandle(new_endpoint=new_endpoint)
 
   def Remount(self):
     return self._device.Remount()
