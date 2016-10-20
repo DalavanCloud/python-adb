@@ -853,8 +853,15 @@ class HighDevice(object):
         return False
       # sys.boot_completed can't be relyed on. It fires too early or worse can
       # be completely missing on some kernels (e.g. Manta).
-      if self.GetProp('init.svc.bootanim') == 'stopped':
+      prop = self.GetProp('init.svc.bootanim')
+      if prop == 'stopped':
         break
+      if prop is None:
+        _LOG.warning(
+            '%s.WaitUntilFullyBooted() could not get init.svc.bootanim: '
+            'Device is unreachable.' %
+            self.port_path)
+        return False
       time.sleep(0.1)
 
     # Then the slowest part of all.
