@@ -652,7 +652,7 @@ class HighDevice(object):
     current = self.PullContent('/sys/class/power_supply/battery/current_now')
     if current:
       try:
-        out[u'current'] = current
+        out[u'current'] = int(current.strip())
       except ValueError:
         pass
 
