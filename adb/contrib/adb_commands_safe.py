@@ -78,12 +78,14 @@ class AdbCommandsSafe(object):
   Only contains the low level commands. High level operations are built upon the
   low level functionality provided by this class.
   """
-  # - CommonUsbError means that device I/O failed, e.g. a write or a read call
-  #   returned an error.
+  # - IOError includes usb_exceptions.CommonUsbError, which means that device
+  #   I/O failed, e.g.  a write or a read call returned an error. It also
+  #   includes adb_protocol.InvalidResponseError which happens if the
+  #   communication becomes desynchronized.
   # - USBError means that a bus I/O failed, e.g. the device path is not present
   #   anymore. It is sometimes thrown as USBErrorIO.
   _ERRORS = (
-      usb_exceptions.CommonUsbError,
+      IOError,
       common.usb1.USBError,
       common.usb1.USBErrorIO)
 
