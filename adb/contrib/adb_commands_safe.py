@@ -50,7 +50,8 @@ def KillADB():
   adb's stability is less than stellar. Kill it with fire.
   """
   _LOG.info('KillADB()')
-  while True:
+  attempts = 10
+  for _ in xrange(attempts):
     try:
       subprocess.check_output(['pgrep', 'adb'])
     except subprocess.CalledProcessError:
@@ -67,6 +68,16 @@ def KillADB():
     # Force thread scheduling to give a chance to the OS to clean out the
     # process.
     time.sleep(0.001)
+
+  try:
+    processes = subprocess.check_output(['ps', 'aux']).splitlines()
+  except subprocess.CalledProcessError:
+    _LOG.error('KillADB(): unable to scan process list.')
+    processes = []
+
+  culprits = '\n'.join(p for p in processes if 'adb' in p)
+  _LOG.error(
+      'KillADB() failed after %d attempts. Potential culprits: %s' % culprits)
 
 
 class AdbCommandsSafe(object):
