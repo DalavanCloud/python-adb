@@ -144,7 +144,7 @@ def _InitCache(device):
     # due to SELinux permission errors. Try again by executing su via shell.
     if not has_su:
       out, exit_code = device.Shell('/system/xbin/su root whoami')
-      if not exit_code and out.strip() == 'root':
+      if not exit_code and out and out.strip() == 'root':
         has_su = True
 
     available_governors = KNOWN_CPU_SCALING_GOVERNOR_VALUES
