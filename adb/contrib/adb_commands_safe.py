@@ -218,7 +218,7 @@ class AdbCommandsSafe(object):
 
   @property
   def serial(self):
-    return self._serial or self._port_path
+    return self._serial
 
   def Close(self):
     if self._adb_cmd:
